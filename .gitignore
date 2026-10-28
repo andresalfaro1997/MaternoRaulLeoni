@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.env.local
+*.local
+tsconfig.tsbuildinfo
+.remember
+.impeccable
+supabase/.temp
+supabase/snippets
+supabase/.branches
