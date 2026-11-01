@@ -1,6 +1,10 @@
 import { supabase } from './supabaseClient'
 import type { Guardia, GuardiaInput } from '../types/database'
 
+export type GuardiaUpsert = Pick<GuardiaInput, 'trabajador_id' | 'fecha' | 'turno'> & {
+  departamento?: string | null
+}
+
 export const guardiasService = {
   async list(): Promise<Guardia[]> {
     const { data, error } = await supabase.from('guardias').select('*').order('fecha').order('turno')
@@ -10,6 +14,15 @@ export const guardiasService = {
 
   async create(input: GuardiaInput): Promise<void> {
     const { error } = await supabase.from('guardias').insert(input)
+    if (error) throw error
+  },
+
+  /** Inserta o actualiza (departamento) las guardias indicadas. */
+  async upsertMany(inputs: GuardiaUpsert[]): Promise<void> {
+    if (inputs.length === 0) return
+    const { error } = await supabase
+      .from('guardias')
+      .upsert(inputs, { onConflict: 'trabajador_id,fecha,turno' })
     if (error) throw error
   },
 

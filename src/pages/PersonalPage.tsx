@@ -49,9 +49,9 @@ export default function PersonalPage() {
   function exportar() {
     downloadCsv(
       'personal.csv',
-      ['cedula', 'nombres', 'apellidos', 'sexo', 'departamento', 'cargo', 'grupo', 'estado', 'telefono'],
+      ['cedula', 'ficha', 'nombres', 'apellidos', 'sexo', 'departamento', 'cargo', 'grupo', 'estado', 'telefono'],
       filteredRows.map((t) => [
-        t.cedula, t.nombres, t.apellidos, t.sexo, t.departamento, t.cargo,
+        t.cedula, t.ficha, t.nombres, t.apellidos, t.sexo, t.departamento, t.cargo,
         grupos.find((g) => g.id === t.grupo_trabajo_id)?.nombre ?? '', t.estado ? 'Activo' : 'Inactivo', t.telefono,
       ]),
     )
@@ -185,6 +185,7 @@ export default function PersonalPage() {
           empty="No hay trabajadores que coincidan con el filtro"
           columns={[
             { header: 'Cédula', render: (t) => <span className="tabular-nums">{t.cedula}</span> },
+            { header: 'Ficha', render: (t) => <span className="tabular-nums">{t.ficha ?? '—'}</span> },
             { header: 'Nombre', render: (t) => `${t.apellidos}, ${t.nombres}` },
             { header: 'Departamento', render: (t) => t.departamento ?? '—' },
             { header: 'Cargo', render: (t) => t.cargo ?? '—' },

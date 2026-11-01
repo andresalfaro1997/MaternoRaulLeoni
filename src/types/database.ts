@@ -43,7 +43,8 @@ export interface Trabajador {
   proceso_jubilacion: string | null
   sexo: string | null
   tipo_trabajador: string | null
-  codigo_rac: string | null
+  codigo: string | null
+  rac: string | null
   ficha: string | null
   fecha_nacimiento: string | null
   horas_laborables: number | null
@@ -69,7 +70,7 @@ export interface TrabajadorPublico {
 
 // ---------------- Horario / guardias ----------------
 
-export type Turno = 'MANANA' | 'TARDE' | 'NOCHE'
+export type Turno = 'MANANA' | 'TARDE' | 'NOCHE' | '24H'
 
 export interface Guardia {
   id: string

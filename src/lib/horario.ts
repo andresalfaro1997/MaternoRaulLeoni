@@ -12,12 +12,14 @@ export const TURNOS: TurnoDef[] = [
   { id: 'MANANA', label: 'Mañana', horaInicio: '07:00', horaFin: '13:00' },
   { id: 'TARDE', label: 'Tarde', horaInicio: '13:00', horaFin: '19:00' },
   { id: 'NOCHE', label: 'Noche', horaInicio: '19:00', horaFin: '07:00' },
+  { id: '24H', label: '24 horas', horaInicio: '07:00', horaFin: '07:00' },
 ]
 
 export const turnoLabel = (t: Turno): string => TURNOS.find((x) => x.id === t)?.label ?? t
 export const turnoHorario = (t: Turno): string => {
   const d = TURNOS.find((x) => x.id === t)
-  return d ? `${d.horaInicio}–${d.horaFin}` : ''
+  if (!d) return ''
+  return t === '24H' ? `${d.horaInicio}–${d.horaFin} (24 h)` : `${d.horaInicio}–${d.horaFin}`
 }
 
 export const SOLICITUD_TIPOS: { id: SolicitudTipo; label: string }[] = [

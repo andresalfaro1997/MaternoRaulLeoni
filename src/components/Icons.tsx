@@ -26,6 +26,7 @@ export const HospitalIcon = (p: IconProps) => (
 )
 export const PlusIcon = (p: IconProps) => <Base {...p}><path d="M12 5v14M5 12h14" /></Base>
 export const DownloadIcon = (p: IconProps) => <Base {...p}><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14" /></Base>
+export const UploadIcon = (p: IconProps) => <Base {...p}><path d="M12 21V9m0 0-4 4m4-4 4 4M5 3h14" /></Base>
 export const UsersIcon = (p: IconProps) => (
   <Base {...p}><circle cx="9" cy="8" r="3" /><path d="M3 20a6 6 0 0 1 12 0" /><path d="M16 6a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 4" /></Base>
 )

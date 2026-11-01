@@ -111,6 +111,36 @@ export const FUNCIONES = [
   'VIGILANTE',
 ]
 
+export const STATUS_OPTIONS = [
+  'Empleado fijo',
+  'Empleado Contratado',
+  'Obrero Contratado',
+  'Obrero Fijo',
+]
+
+export const CONDICION_OPTIONS = [
+  'NORMAL',
+  'MODALIDAD DE CAMBIO',
+  'JUBILADO (A)',
+  'TRASLADO',
+  'RENUNCIA',
+  'FALLECIDO',
+  'TRASLADO / INACTIVO',
+  'CULMINACION DE CONTRATO',
+  'INCAPACITADO(A)',
+  'INCAPACITADO(A) / INACTIVO',
+  'ACTIVO JUBILABLE ART.11',
+  'REPOSO MEDICO',
+  'ARTICULO. 11 / INACTIVO',
+  'COMISION DE SERVICIO',
+  'DISPOSICION AL SISTEMA',
+  'DESTITUCION DEL CARGO',
+  'PERMISO SINDICAL / INACTIVO',
+  'CLAUSULA. 63',
+  'CLAUSULA. 63 / INACTIVO',
+  'PERMISO SINDICAL',
+]
+
 export const SECTIONS: FieldSection[] = [
   {
     title: 'Datos personales',
@@ -138,13 +168,14 @@ export const SECTIONS: FieldSection[] = [
     fields: [
       { key: 'nro_personal', label: 'N° de personal', kind: 'text' },
       { key: 'ficha', label: 'Ficha', kind: 'text' },
-      { key: 'codigo_rac', label: 'Código y/o RAC', kind: 'text' },
-      { key: 'cargo', label: 'Función que ejerce', kind: 'select', options: FUNCIONES, wide: true },
-      { key: 'nivel_grado_cargo', label: 'Nivel y/o grado del cargo', kind: 'text' },
-      { key: 'tipo_trabajador', label: 'Tipo de trabajador', kind: 'select', options: ['EC', 'OC'] },
-      { key: 'dependencia', label: 'Dependencia', kind: 'select', options: ['MPPS', 'EEZ'] },
+      { key: 'codigo', label: 'Código', kind: 'text' },
+      { key: 'rac', label: 'RAC', kind: 'text' },
+      { key: 'cargo', label: 'Función', kind: 'select', options: FUNCIONES, wide: true },
+      { key: 'nivel_grado_cargo', label: 'Cargo', kind: 'text' },
+      { key: 'tipo_trabajador', label: 'Tipo de trabajador', kind: 'select', options: ['EC', 'OC', 'OF', 'EF'] },
+      { key: 'dependencia', label: 'Dependencia', kind: 'select', options: ['MPPS', 'EEZ', 'CENTRAL'] },
       { key: 'departamento', label: 'Departamento', kind: 'select', options: DEPARTAMENTOS },
-      { key: 'condicion', label: 'Condición', kind: 'text' },
+      { key: 'condicion', label: 'Condición', kind: 'select', options: CONDICION_OPTIONS },
       { key: 'horas_laborables', label: 'Horas laborables', kind: 'number' },
       { key: 'fecha_ingreso', label: 'Fecha de ingreso', kind: 'date' },
       { key: 'fecha_egreso', label: 'Fecha de egreso', kind: 'date' },
@@ -154,7 +185,7 @@ export const SECTIONS: FieldSection[] = [
   {
     title: 'Situación',
     fields: [
-      { key: 'status', label: 'Status', kind: 'text' },
+      { key: 'status', label: 'Status', kind: 'select', options: STATUS_OPTIONS },
       { key: 'activo_no_laborando', label: 'Activo no laborando', kind: 'text' },
       { key: 'proceso_jubilacion', label: 'Proceso de jubilación', kind: 'text' },
       { key: 'observacion_incapacidad', label: 'Observación y/o fecha de incapacidad (Cláus. 63, Art. 11 u otro)', kind: 'textarea', wide: true },
@@ -167,7 +198,7 @@ export const EMPTY_WORKER: TrabajadorInput = {
   nro_personal: null, cargo: null, fecha_ingreso: null, fecha_egreso: null, fecha_ingreso_eez_mpps: null,
   dependencia: null, condicion: null, status: null, departamento: null, observacion_incapacidad: null,
   nivel_grado_cargo: null, grado_instruccion: null, activo_no_laborando: null, proceso_jubilacion: null,
-  sexo: null, tipo_trabajador: null, codigo_rac: null, ficha: null,
+  sexo: null, tipo_trabajador: null, codigo: null, rac: null, ficha: null,
   fecha_nacimiento: null, horas_laborables: null,
 }
 

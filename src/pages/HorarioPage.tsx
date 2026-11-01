@@ -8,7 +8,8 @@ import { gruposService } from '../services/gruposService'
 import { SolicitudItem } from '../components/SolicitudItem'
 import { useDialogs } from '../components/Dialogs'
 import { Select } from '../components/Select'
-import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, PrinterIcon, WarningIcon, XIcon } from '../components/Icons'
+import { CargaMasivaGuardias } from '../components/CargaMasivaGuardias'
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, PrinterIcon, UploadIcon, WarningIcon, XIcon } from '../components/Icons'
 import { DEPARTAMENTOS } from '../lib/workerFields'
 import { errorMessage } from '../lib/errors'
 import {
@@ -17,7 +18,7 @@ import {
 import type { Guardia, GrupoTrabajo, Solicitud, TrabajadorPublico, Turno } from '../types/database'
 
 type Tab = 'guardias' | 'solicitudes' | 'reportes'
-const TURNO_ORDER: Turno[] = ['MANANA', 'TARDE', 'NOCHE']
+const TURNO_ORDER: Turno[] = ['MANANA', 'TARDE', 'NOCHE', '24H']
 const nombreCompleto = (t: { apellidos: string; nombres: string }) => `${t.apellidos}, ${t.nombres}`
 
 export default function HorarioPage() {
@@ -45,6 +46,7 @@ export default function HorarioPage() {
   const [nDepto, setNDepto] = useState('')
   const [nObs, setNObs] = useState('')
   const [showForm, setShowForm] = useState(false)
+  const [showCarga, setShowCarga] = useState(false)
   const [modalState, setModalState] = useState<'closed' | 'open' | 'closing'>('closed')
   const [comentarios, setComentarios] = useState<Record<string, string>>({})
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -331,6 +333,62 @@ export default function HorarioPage() {
     } catch (err) { setError(errorMessage(err, 'No se pudo resolver la solicitud')) }
   }
 
+  function imprimirDia() {
+    const esc = (v: unknown) => String(v ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+
+    const items = guardias.filter((g) => g.fecha === selectedDay)
+    const secciones = TURNOS.map((t) => {
+      const rows = items
+        .filter((g) => g.turno === t.id)
+        .sort((a, b) => (names[a.trabajador_id] ?? '').localeCompare(names[b.trabajador_id] ?? '', 'es'))
+      const cuerpo = rows.length === 0
+        ? '<tr><td colspan="5" class="empty">Sin personal asignado.</td></tr>'
+        : rows.map((g, i) => {
+            const tt = trabMap[g.trabajador_id]
+            return `<tr><td class="num">${i + 1}</td><td>${esc(names[g.trabajador_id] ?? '—')}</td><td class="num">${esc(tt?.cedula ?? '—')}</td><td>${esc(tt?.grupo_nombre ?? '—')}</td><td>${esc(deptoDe(g) || '—')}</td></tr>`
+          }).join('')
+      return `<section><h2>${esc(t.label)} <span>${esc(t.horaInicio)}–${esc(t.horaFin)} · ${rows.length} persona(s)</span></h2><table><thead><tr><th class="num">#</th><th>Apellidos y nombres</th><th class="num">Cédula</th><th>Grupo</th><th>Departamento</th></tr></thead><tbody>${cuerpo}</tbody></table></section>`
+    }).join('')
+
+    const generado = new Date().toLocaleString('es-VE', { dateStyle: 'short', timeStyle: 'short' })
+    const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Guardias ${esc(selectedDay)}</title><style>
+@page{size:A4 portrait;margin:16mm}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#111;font-size:12px}
+header{border-bottom:2px solid #173A5E;padding-bottom:8px;margin-bottom:16px}
+.brand{margin:0 0 4px;color:#173A5E;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+h1{margin:0 0 2px;font-size:20px;color:#173A5E}
+.sub{margin:0;color:#444;font-size:12px}
+section{margin:0 0 14px;break-inside:avoid}
+h2{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0 0 6px;padding-bottom:3px;border-bottom:1px solid #ccc;font-size:13px;color:#173A5E}
+h2 span{font-size:11px;font-weight:400;color:#555;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th,td{padding:5px 6px;border-bottom:1px solid #ddd;text-align:left;vertical-align:top}
+th{border-bottom:1.5px solid #666;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:#333}
+td.num,th.num{white-space:nowrap}
+.empty{color:#777;font-style:italic}
+footer{display:flex;justify-content:space-between;gap:12px;margin-top:16px;padding-top:8px;border-top:1px solid #ccc;font-size:10.5px;color:#555}
+@media print{thead{display:table-header-group}tr{break-inside:avoid}}
+</style></head><body>
+<header><p class="brand">RRHH Hospital</p><h1>Guardias del personal</h1><p class="sub">${esc(fmtDia(selectedDay))} · ${esc(fmtFecha(selectedDay))}</p></header>
+${secciones}
+<footer><span>Total: ${items.length} guardia(s)</span><span>Generado: ${esc(generado)}</span></footer>
+</body></html>`
+
+    const win = window.open('', '_blank', 'width=900,height=700')
+    if (!win) {
+      void dialogs.avisar({ title: 'Imprimir', message: 'El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes para este sitio.' })
+      return
+    }
+    win.document.open()
+    win.document.write(html)
+    win.document.close()
+    win.focus()
+    window.setTimeout(() => win.print(), 250)
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -373,7 +431,10 @@ export default function HorarioPage() {
               ><ChevronRightIcon /></button>
               <button className="btn-ghost !py-1.5" onClick={() => { const d = new Date(); setMonth(new Date(d.getFullYear(), d.getMonth(), 1)); setSelectedDay(isoDate(d)) }}>Hoy</button>
               {canWrite && (
-                <button className="btn-primary w-full !py-1.5 sm:ml-auto sm:w-auto" onClick={abrirModal}><PlusIcon /> Agregar guardia</button>
+                <>
+                  <button className="btn-ghost w-full !py-1.5 sm:ml-auto sm:w-auto" onClick={() => setShowCarga(true)}><UploadIcon /> Carga masiva</button>
+                  <button className="btn-primary w-full !py-1.5 sm:w-auto" onClick={() => { setNFecha(selectedDay); abrirModal() }}><PlusIcon /> Agregar guardia</button>
+                </>
               )}
             </div>
             <div className="grid gap-2 sm:grid-cols-3">
@@ -460,6 +521,16 @@ export default function HorarioPage() {
             </div>
           )}
 
+          {canWrite && showCarga && (
+            <CargaMasivaGuardias
+              onClose={() => setShowCarga(false)}
+              onDone={load}
+              trabajadores={trabajadores}
+              guardias={guardias}
+              ausencias={ausencias}
+            />
+          )}
+
           {loading ? (
             <p className="card text-center text-slate-500 dark:text-slate-400">Cargando…</p>
           ) : (
@@ -497,9 +568,9 @@ export default function HorarioPage() {
               <section className="card space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-sm font-bold text-brand-900 dark:text-brand-200">{fmtDia(selectedDay)} · <span className="tabular-nums">{fmtFecha(selectedDay)}</span></h3>
-                  {canWrite && (
-                    <button className="btn-ghost !py-1.5" onClick={() => { setNFecha(selectedDay); abrirModal() }}><PlusIcon /> Agregar guardia</button>
-                  )}
+                  <div className="flex flex-wrap gap-2">
+                    <button className="btn-ghost !py-1.5" onClick={imprimirDia}><PrinterIcon /> Imprimir día</button>
+                  </div>
                 </div>
                 {delDia.length === 0 ? (
                   <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">Nadie de guardia este día.</p>
